@@ -29,7 +29,7 @@ class _LoadingPageState extends State<LoadingPage> {
     await Future.delayed(const Duration(seconds: 1));
 
     requestPermissions();
-    const storage = FlutterSecureStorage();
+    final storage = FlutterSecureStorage();
     var loggedin = await storage.read(key: 'loggedin');
     debugPrint("loggedin: $loggedin");
     if (loggedin == null) {

@@ -6,22 +6,21 @@ import 'package:alert_me/widgets/save_or_add_button.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:http/http.dart';
 
-import '../homepage.dart';
-
 showSnakeBar(status, context) {
   var statusSnackBar = SnackBar(
-    duration: const Duration(seconds: 1),
+    duration: Duration(seconds: 1),
     content: Text(status),
   );
   ScaffoldMessenger.of(context).showSnackBar(statusSnackBar);
 }
 
 Future<Profile> fetchProfile() async {
-  const storage = FlutterSecureStorage();
+  final storage = new FlutterSecureStorage();
   String? phone = await storage.read(key: "phone");
-  debugPrint('phone inside fetchProfile: $phone');
-  final profileUrl = 'https://alertme.onrender.com/api/v1/profile/$phone';
-  debugPrint('profile url: https://alertme.onrender.com/api/v1/profile/$phone');
+  debugPrint('phone inside fetchProfile: ${phone}');
+  final profileUrl = 'https://alertme.onrender.com/api/v1/profile/${phone}';
+  debugPrint(
+      'profile url: https://alertme.onrender.com/api/v1/profile/${phone}');
   final response = await http.get(Uri.parse(profileUrl));
   debugPrint("return status code: ${response.statusCode}");
 
@@ -40,7 +39,7 @@ Future<Profile> fetchProfile() async {
 
 Future<String> setProfile(name, dateOfBirth, bloodGroup, medicalDetails) async {
   try {
-    const storage = FlutterSecureStorage();
+    final storage = new FlutterSecureStorage();
     String? phone = await storage.read(key: "phone");
 
     final uri = Uri.parse('https://alertme.onrender.com/api/v1/profile');
@@ -116,7 +115,7 @@ class _EmergencyProfilePageState extends State<EmergencyProfilePage> {
   final TextEditingController _dateController = TextEditingController();
   final TextEditingController _bloodGroupController = TextEditingController();
   final TextEditingController _medicalController = TextEditingController();
-  final savedProfile = const SnackBar(
+  final savedProfile = SnackBar(
     content: Text('Profile saved success'),
   );
 
@@ -128,6 +127,7 @@ class _EmergencyProfilePageState extends State<EmergencyProfilePage> {
 
   @override
   void dispose() {
+    // TODO: implement dispose
     super.dispose();
   }
 
@@ -152,7 +152,7 @@ class _EmergencyProfilePageState extends State<EmergencyProfilePage> {
                 _bloodGroupController.text = snapshot.data!.bloodGroup;
                 _medicalController.text = snapshot.data!.medicalDetails;
 
-                return ProfileForm(
+                return profileForm(
                     nameController: _nameController,
                     dateController: _dateController,
                     bloodGroupController: _bloodGroupController,
@@ -166,7 +166,7 @@ class _EmergencyProfilePageState extends State<EmergencyProfilePage> {
                     child: Text("no net connection"),
                   );
                 } else {
-                  return ProfileForm(
+                  return profileForm(
                       nameController: _nameController,
                       dateController: _dateController,
                       bloodGroupController: _bloodGroupController,
@@ -175,15 +175,15 @@ class _EmergencyProfilePageState extends State<EmergencyProfilePage> {
               }
 
               // By default, show a loading spinner.
-              return const Center(child: CircularProgressIndicator());
+              return Center(child: const CircularProgressIndicator());
             },
           )),
     );
   }
 }
 
-class ProfileForm extends StatelessWidget {
-  const ProfileForm({
+class profileForm extends StatelessWidget {
+  const profileForm({
     super.key,
     required TextEditingController nameController,
     required TextEditingController dateController,
@@ -235,33 +235,17 @@ class ProfileForm extends StatelessWidget {
             width: 70.0,
             height: 35.0,
             child: Center(
-                child: Row(
-              children: [
-                CustomButton(
-                  text: 'Save Profile',
-                  onPressed: () async {
-                    String saveStatus = await setProfile(
-                      _nameController.text,
-                      _dateController.text,
-                      _bloodGroupController.text,
-                      _medicalController.text,
-                    );
-                    if (context.mounted) showSnakeBar(saveStatus, context);
-                  },
-                ),
-                const SizedBox(
-                  width: 30,
-                ),
-                CustomButton(
-                    text: 'Done',
-                    onPressed: () {
-                      Navigator.pushAndRemoveUntil(
-                          context,
-                          MaterialPageRoute(
-                              builder: (context) => const HomePage()),
-                          (route) => false);
-                    })
-              ],
+                child: CustomButton(
+              text: 'Save Profile',
+              onPressed: () async {
+                String saveStatus = await setProfile(
+                  _nameController.text,
+                  _dateController.text,
+                  _bloodGroupController.text,
+                  _medicalController.text,
+                );
+                showSnakeBar(saveStatus, context);
+              },
             )),
           ),
         ]),
