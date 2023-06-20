@@ -1,9 +1,10 @@
 import 'dart:convert';
-import 'package:flutter/material.dart';
+
+import 'package:flutter/cupertino.dart';
 import 'package:http/http.dart' as http;
 
 class AlertData {
-  String id;
+String id;
   String name;
   String phone;
   int flagCount;
@@ -16,7 +17,8 @@ class AlertData {
       this.time, this.location, this.v);
 }
 
-class ProfileData {
+
+class ProfileData{
   String name;
   String phone;
   String time;
@@ -27,18 +29,20 @@ class ProfileData {
   int viewCount;
   int flagCount;
 
-  ProfileData(this.name, this.phone, this.time, this.location, this.bloodGroup,
-      this.dateOfBirth, this.medicalDetails, this.viewCount, this.flagCount);
+  ProfileData(this.name,this.phone,this.time,this.location,this.bloodGroup,this.dateOfBirth,this.medicalDetails,this.viewCount,this.flagCount);
 }
+
 
 class AlertReceiver {
   static Future<List<AlertData>> fetchAllAlert() async {
     final response =
         await http.get(Uri.parse('https://alertme.onrender.com/api/v1/alert'));
+      
 
     if (response.statusCode == 201) {
       final List<dynamic> responseData = jsonDecode(response.body);
       final List<AlertData> alertDataList = responseData.map((json) {
+
         return AlertData(
           json['_id'],
           json['name'],
@@ -50,7 +54,6 @@ class AlertReceiver {
           json['__v'],
         );
       }).toList();
-      debugPrint('$alertDataList');
       return alertDataList;
     } else {
       throw Exception("Failed to fetch alerts");
@@ -58,12 +61,13 @@ class AlertReceiver {
   }
 
   static Future<ProfileData> fetchProfileData(String id) async {
-    final response = await http
-        .get(Uri.parse('https://alertme.onrender.com/api/v1/alert/$id'));
+     final response =
+        await http.get(Uri.parse('https://alertme.onrender.com/api/v1/alert/$id'));
 
-    if (response.statusCode == 201) {
-      final responseData = json.decode(response.body);
-      final profileData = ProfileData(
+     
+      if(response.statusCode == 201){
+        final responseData = json.decode(response.body);
+        final profileData = ProfileData(
           responseData['name'],
           responseData['phone'],
           responseData['time'],
@@ -72,10 +76,13 @@ class AlertReceiver {
           responseData['date_of_birth'],
           responseData['medical_detail'],
           responseData['view_count'],
-          responseData['flag_count']);
-      return profileData;
-    } else {
-      throw Exception("Couldn't fetch profile data");
-    }
+          responseData['flag_count']
+          );
+          return profileData;
+      }
+      else{
+        throw Exception("Couldn't fetch profile data");
+      }
+
   }
 }

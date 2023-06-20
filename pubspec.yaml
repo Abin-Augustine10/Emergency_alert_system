@@ -44,11 +44,6 @@ dependencies:
   flutter_secure_storage: ^8.0.0
   firebase_messaging: ^14.6.3
   flutter_local_notifications: ^14.1.1
-  geolocator: ^9.0.2
-  intl: ^0.18.1
-  url_launcher: ^6.1.11
-  android_intent_plus: ^4.0.1
-  font_awesome_flutter: ^10.4.0
 
 dev_dependencies:
   flutter_test:

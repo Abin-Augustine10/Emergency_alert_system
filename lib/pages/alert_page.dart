@@ -1,10 +1,6 @@
 import 'dart:async';
-import 'package:alert_me/utils/sent_all_alerts.dart';
-
 import 'package:alert_me/utils/alert_sms.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 
 class AlertPage extends StatefulWidget {
   const AlertPage({super.key});
@@ -14,41 +10,25 @@ class AlertPage extends StatefulWidget {
 }
 
 class _AlertPageState extends State<AlertPage> {
-  final FlutterSecureStorage secureStorage = FlutterSecureStorage();
-  String screen = '';
+  bool isVisible = true;
   static const maxSeconds = 5;
   int seconds = maxSeconds;
   Timer? timer;
 
   void startTimer() {
-    timer = Timer.periodic(const Duration(seconds: 1), (_) async {
+    timer = Timer.periodic(const Duration(seconds: 1), (_) {
       if (seconds > 0) {
         setState(() {
           seconds--;
         });
       } else {
-        AlertSendModule.sentAlerts();
-        secureStorage.write(key: 'screen', value: 'status');
         setState(() {
-
           SMSSender.sendSMS();
           timer?.cancel();
-
           seconds = maxSeconds;
-          screen = 'status';
+          isVisible = !isVisible;
         });
       }
-    });
-  }
-
-  @override
-  void initState() {
-    super.initState();
-    secureStorage.read(key: 'screen').then((value) {
-      setState(() {
-        screen = value ?? 'alert';
-      });
-      debugPrint("inside init state: $screen");
     });
   }
 
@@ -60,29 +40,20 @@ class _AlertPageState extends State<AlertPage> {
 
   @override
   Widget build(BuildContext context) {
-    debugPrint("building screen: $screen");
     return Center(
       child: SingleChildScrollView(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
-          children: [returnScreen()],
+          children: isVisible == false
+              ? [
+                  alertCountDown(),
+                ]
+              : [
+                  alertButton(),
+                ],
         ),
       ),
     );
-  }
-
-  Widget returnScreen() {
-    debugPrint("screen: $screen");
-
-    if (screen == 'alert') {
-      return alertButton();
-    } else if (screen == 'countdown') {
-      return alertCountDown();
-    } else if (screen == 'status') {
-      return alertStatus();
-    } else {
-      return const SizedBox();
-    }
   }
 
   Center alertCountDown() {
@@ -133,11 +104,10 @@ class _AlertPageState extends State<AlertPage> {
                 foregroundColor: MaterialStatePropertyAll(Colors.white),
               ),
               onPressed: () {
-                secureStorage.write(key: 'screen', value: 'alert');
                 setState(() {
                   timer?.cancel();
                   seconds = maxSeconds;
-                  screen = 'alert';
+                  isVisible = !isVisible;
                 });
               },
               child: const Text(
@@ -153,35 +123,6 @@ class _AlertPageState extends State<AlertPage> {
     );
   }
 
-  Widget alertStatus() {
-    return Column(
-      children: [
-        // Row(
-        //   mainAxisAlignment: MainAxisAlignment.center,
-        //   children: [
-        //     IconButton.filled(
-        //         iconSize: 60,
-        //         onPressed: () {},
-        //         icon: FaIcon(FontAwesomeIcons.fireFlameCurved)),
-        //     Padding(
-        //       padding: EdgeInsets.all(90),
-        //     ),
-        //     IconButton.filled(
-        //         onPressed: () {}, icon: FaIcon(FontAwesomeIcons.carSide)),
-        //   ],
-        // ),
-        ElevatedButton(
-            onPressed: () {
-              secureStorage.write(key: 'screen', value: 'alert');
-              setState(() {
-                screen = 'alert';
-              });
-            },
-            child: const Text("Abort Alert"))
-      ],
-    );
-  }
-
   Container alertButton() {
     return Container(
       height: 293.0,
@@ -192,7 +133,7 @@ class _AlertPageState extends State<AlertPage> {
           startTimer();
 
           setState(() {
-            screen = 'countdown';
+            isVisible = !isVisible;
           });
 
           // Handle panic button press event
